@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Ambipr0
+// @name         nsfb
 // @namespace    none
 // @version      0.1
 // @description  adds nice video background
