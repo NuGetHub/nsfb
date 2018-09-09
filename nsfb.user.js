@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         nsfb
 // @namespace    none
-// @version      0.1
+// @version      0.2
 // @description  adds nice video background
 // @author       5yn74x
 // @match        https://pr0gramm.com/*
