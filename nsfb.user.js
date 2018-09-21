@@ -1,81 +1,113 @@
 // ==UserScript==
 // @name         nsfb
 // @namespace    none
-// @version      0.2
+// @version      1.2
 // @description  adds nice video background
 // @author       5yn74x
 // @match        https://pr0gramm.com/*
 // @grant        unsafeWindow
 // ==/UserScript==
 
-
 if (typeof(Storage) !== "undefined") {
     if (!localStorage.getItem("nsfb_active")) {
         localStorage.setItem("nsfb_active", "true");
         localStorage.setItem("nsfb_canvas", "true");
         localStorage.setItem("nsfb_comment", "rgba(22, 22, 24, .5)");
+        localStorage.setItem("nsfb_zoom", "true");
+    }
+    if(localStorage.getItem("nsfb_active") === "true") {
+        p.View.Stream.Item.prototype.template =
+            p.View.Stream.Item.prototype.template.replace('<div class="item-comments"></div> </div> ', '<div class="item-comments"></div> </div> <script>on();</script>');
     }
 } else {
     // No Web Storage support
 }
 
-unsafeWindow.nsfbv = function() {
-    var v = document.getElementsByClassName('item-image')[0];
-    var canvas = document.getElementById('video-background');
-    var context = canvas.getContext('2d');
-
-    var cw = Math.floor(canvas.clientWidth / 80);
-    var ch = Math.floor(canvas.clientHeight / 80);
-    canvas.width = cw;
-    canvas.height = ch;
-
-    v.addEventListener('play', function(){
-        draw(this,context,cw,ch);
-    },false);
-
-
-    function draw(v,c,w,h) {
-        if(v.paused || v.ended)	return false;
-        c.drawImage(v,0,0,w,h);
-        setTimeout(draw,20,v,c,w,h);
-    }
+unsafeWindow.nsfb_opensettings = function() {
+    const overlay = `<div id="overlay-box"><div class="overlay-content" id="nsfb_settings"> <h2>Ambipr0 Einstellungen</h2> </div> <div class="overlay-content"> <div class="form-row"> <p>Hier kannst du die Einstellungen für Ambipr0 anpassen, falls du Fragen haben solltest, kannst du dich an <a href="https://pr0gramm.com/user/5yn74x">5yn74x</a> wenden.</p>               <label> <input name="nsfb_active" type="radio" value="Verstoß in den Tags"> AMBIPR0 aktivieren</label> <label> <input name="nsfb_active" type="radio" value="Ich habe diesen Beitrag selbst erstellt und möchte ihn gelöscht haben"> AMBIPR0 deaktivieren</label> </div> <div class="form-row"> </div> <div class="form-row">   <input value="Schließen" id="nsfb_save" type="submit" onclick="nsfb_closeSettings();"> </div> </div> </div>`;
+    $('.overlay-content').remove();
+    $('#overlay-box').append(overlay);
+    $('#overlay').attr("style", "display: block;");
 };
 
-unsafeWindow.nsfbi = function() {
-    var v = document.getElementsByClassName('item-image')[0];
-    var canvas = document.getElementById('video-background');
-    var context = canvas.getContext('2d');
-
-    var cw = Math.floor(canvas.clientWidth / 10);
-    var ch = Math.floor(canvas.clientHeight / 10);
-    canvas.width = cw;
-    canvas.height = ch;
-    context.drawImage(v, 0, 0);
+unsafeWindow.nsfb_closeSettings = function() {
+    $('#overlay').attr('style', 'display: none;');
+    $('#nsfb_settings').remove();
+    var meta = document.createElement('meta');
+    meta.httpEquiv = "Expires";
+    meta.content = "-1";
+    document.getElementsByTagName('head')[0].appendChild(meta);
+    location.reload(true);
 };
-
-
-//(localStorage.getItem('nsfb_active') === "true") ? 'checked="checked"' : '';
-var get_active = function() {
- if(localStorage.getItem('nsfb_active') == "true") {
-     return 'checked="checked"';
- } else return '';
-};
+function createSetting() {
+    p.View.Stream.Item.prototype.template =
+        p.View.Stream.Item.prototype.template.replace('melden</span>] <?js } ?>', 'melden</span>] <?js } ?> [<a onclick="nsfb_opensettings();">Ambipr0</a>]');
+}
 
 (function() {
     'use strict';
-        p.View.Settings.prototype.template =
-            p.View.Settings.prototype.template
-            .replace('Bookmarklet</a>', `Extras</a>`)
-            .replace(`<?js if(tab == 'bookmarklet') { ?> <div class="bookmarklet-frame"> <p> Mit dem <em>+pr0g</em> Bookmarklet kannst du direkt von jeder Website Bilder auf pr0gramm hochladen. </p> <p> <a class="bookmarklet" title="Ziehe diesen Link in deine Bookmarks!" href="{CONFIG.BOOKMARKLET}"> <img src="/media/pr0gramm-favicon.png" class="bookmarklet-icon"/> +pr0g </a> &nbsp;« Ziehe diesen Link in deine Bookmarks! </p> <img src="/media/bookmarklet-instruction.gif" class="bookmarklet-instruction"/> </div>`,
-                     `<?js if(tab == 'bookmarklet') { ?><h2>Extras</h2><h3>NSFB / Ambipr0</h3><div class="form-section"> <input type="checkbox" class="box-from-label" name="a" id="a" ${get_active()} /> <label class="checkbox" for="a">Aktiv</label><label>Kommentarfeldfarbe CSS</label> <input type="colorcomments" name="colorcomments" id="colorcomments" class="text-line" value="${localStorage.getItem('nsfb_comment')}"/> <input type="submit" value="Farbe übernehmen" class="settings-save" onclick="setcolor();" /></div> <script>const checkbox=document.getElementById('a');checkbox.addEventListener('change',(event)=>{if(event.target.checked){localStorage.setItem("nsfb_active",true);window.location="https://pr0gramm.com/";}else{localStorage.setItem("nsfb_active",false);window.location="https://pr0gramm.com/";}});function setcolor(){let x=document.getElementById('colorcomments');localStorage.setItem("nsfb_comment",x.value);window.location="https://pr0gramm.com/";}</script> <h3>Bookmarklet</h3><div class="bookmarklet-frame"> <p> Mit dem <em>+pr0g</em> Bookmarklet kannst du direkt von jeder Website Bilder auf pr0gramm hochladen. </p> <p> <a class="bookmarklet" title="Ziehe diesen Link in deine Bookmarks!" href="{CONFIG.BOOKMARKLET}"> <img src="/media/pr0gramm-favicon.png" class="bookmarklet-icon"/> +pr0g </a> &nbsp;« Ziehe diesen Link in deine Bookmarks! </p> <img src="/media/bookmarklet-instruction.gif" class="bookmarklet-instruction"/> </div>`);
 
-        if(localStorage.getItem('nsfb_active') == "true") {
-            const css = `<style > body{margin:0;padding:0;background:rgba(22, 22, 24, .01);background-attachment:fixed;background-size:cover}div.item-container{background:rgba(1, 1, 0, .0)!important}div.item-comments{background:${localStorage.getItem("nsfb_comment")}!important}#video-background{position:fixed;right:0;bottom:0;min-width:100%;min-height:100%;width:auto;height:auto;z-index:-100;-webkit-filter: blur(15px);-moz-filter: blur(15px);-o-filter: blur(15px);-ms-filter: blur(15px);filter: blur(15px)}</style>`;
-            $('body').append(css);
-            $('body').append(`<canvas id="video-background"></canvas>`);
-            p.View.Stream.Item.prototype.template =
-                p.View.Stream.Item.prototype.template
-                .replace('<div class="item-comments"></div> </div>',
-                         '<div class="item-comments"></div> </div> <?js if( item.video ) {?><script>nsfbv();</script> <?js  }  else { ?><script>nsfbi();</script><?js } ?>');
+    createSetting();
+    p.user.Admin = true;
+    unsafeWindow.on = function() {
+        if(localStorage.getItem('nsfb_active') == "false") return;
+        const bgCanvas = document.createElement("canvas");
+        bgCanvas.className = "bg-canvas";
+        const s = bgCanvas.style;
+        document.body.insertBefore(bgCanvas, document.body.firstChild);
+
+        const ctx = bgCanvas.getContext("2d");
+
+        window.requestAnimFrame = (function () {
+            return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function (callback) { window.setTimeout(callback, 1000 / 60); };
+        })();
+
+        function getImage() {
+            const imgs = document.getElementsByClassName("item-image");
+            return !!imgs && imgs.length == 1 ? imgs[0] : undefined;
         }
+
+        const css = `
+.bg-canvas {
+position: fixed;
+top: 0; bottom: 0; left: 0; right: 0;
+width: 100%;
+height: 100%;
+filter: blur(30px);
+transform: translate3d(0, 0, 0);
+transition: opacity 0.15s;
+opacity: 1.0;
+}
+.item-container {
+background: transparent !important;
+}
+.item-info, .item-comments {
+background: rgba(22, 22, 24, .5) !important;
+}
+.vote-up, .vote-down {
+color: #555;
+}
+`;
+
+        const cw = bgCanvas.width = bgCanvas.clientWidth | 0;
+        const ch = bgCanvas.height = bgCanvas.clientHeight | 0;
+
+        function updateBg() {
+            const img = getImage();
+            if (img) {
+                s.opacity = 1.0;
+                ctx.drawImage(img, 0, 0, cw, ch);
+            } else {
+                s.opacity = 0.0;
+            }
+            requestAnimFrame(updateBg);
+        }
+
+        const cssElement = document.createElement("style");
+        cssElement.textContent = css;
+        document.body.appendChild(cssElement);
+        updateBg();
+    };
+
+
 })();
