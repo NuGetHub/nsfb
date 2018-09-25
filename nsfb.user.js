@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         nsfb
 // @namespace    none
-// @version      1.2
+// @version      1.3
 // @description  adds nice video background
 // @author       5yn74x
 // @match        https://pr0gramm.com/*
@@ -63,7 +63,7 @@ function createSetting() {
         })();
 
         function getImage() {
-            const imgs = document.getElementsByClassName("item-image");
+            const imgs = document.getElementsByClassName("item-image-actual");
             return !!imgs && imgs.length == 1 ? imgs[0] : undefined;
         }
 
